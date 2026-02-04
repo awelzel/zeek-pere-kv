@@ -1,0 +1,5 @@
+[package]
+name = PereKV
+description = Persistent Replicated Key Value Store
+depends =
+  zeek >=8.0.0
