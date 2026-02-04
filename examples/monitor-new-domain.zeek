@@ -1,22 +1,24 @@
 ##! Example using dns_request() and creating a New_Domain_Resolved
 ##! notice if the original_query has not yet been observed. Uses
-##! the pere-kv package for persisten storage of the query.
+##! the zeek-pere-kv package for persistent cluster-wide storage
+##! of the original_query.
 
 @load base/frameworks/notice
-@load packages/pere-kv
 
-module NewDomain::Demo;
+@load packages/zeek-pere-kv
+
+module MonitorNewDomain;
 
 export {
 	redef enum Notice::Type += {
 		New_Domain_Resolved,
 	};
 
-	# Holds patters for original_query values to ignore.
+	# Holds patters to ignore original_query values to ignore.
 	# e.g., inserting  .*\.google\.com$ would ignore any
 	# queries for google.com subdomains.
 	const ignore_query_patterns: set[pattern] = {
-		# ... patterns ....
+		/.*\.safeframe\.googlesyndication\.com$/
 	} &redef;
 
 	# Expiration time for domains.
@@ -33,19 +35,18 @@ global query_store: PereKV::Store;
 
 event zeek_init()
 	{
-	query_store = PereKV::new_store("new_domain_demo", query_expiration);
+	query_store = PereKV::new_store("monitor_new_domain", query_expiration);
 	}
 
 event dns_request(c: connection, msg: dns_msg, query: string,
                   qtype: count, qclass: count, original_query: string)
 	{
+
 	if ( original_query in ignore_query_patterns )
 		return;
 
-
 	if ( PereKV::contains(query_store, original_query) )
 		return;
-
 
 	NOTICE(Notice::Info(
 		$note=New_Domain_Resolved,
