@@ -1,5 +1,6 @@
 [package]
 name = PereKV
+script_dir = ./scripts
 description = Persistent Replicated Key Value Store
 depends =
   zeek >=8.0.0
