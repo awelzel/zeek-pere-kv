@@ -18,7 +18,11 @@ export {
 	# e.g., inserting  .*\.google\.com$ would ignore any
 	# queries for google.com subdomains.
 	const ignore_query_patterns: set[pattern] = {
-		/.*\.safeframe\.googlesyndication\.com$/
+		/.*\.safeframe\.googlesyndication\.com$/,
+		/.*\.gstatic\.com$/,
+		/.*\.googleapis\.com$/,
+		/.*\.akamaiedge\.net$/,
+		/.*\.cdninstagram\.com$/
 	} &redef;
 
 	# Expiration time for domains.
