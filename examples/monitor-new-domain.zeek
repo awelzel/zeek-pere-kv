@@ -14,15 +14,15 @@ export {
 		New_Domain_Resolved,
 	};
 
-	# Holds patters to ignore original_query values to ignore.
-	# e.g., inserting  .*\.google\.com$ would ignore any
-	# queries for google.com subdomains.
+	# Holds patters to ignore from notices.
 	const ignore_query_patterns: set[pattern] = {
 		/.*\.safeframe\.googlesyndication\.com$/,
 		/.*\.gstatic\.com$/,
 		/.*\.googleapis\.com$/,
+		/.*\.clients6.google\.com$/,
 		/.*\.akamaiedge\.net$/,
-		/.*\.cdninstagram\.com$/
+		/.*\.cdninstagram\.com$/,
+		/.*\.cdn.whatsapp\.net$/,
 	} &redef;
 
 	# Expiration time for domains.
