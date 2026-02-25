@@ -163,6 +163,12 @@ export {
 	## results in individual processes to have similar expiration times.
 	const default_overwrite = T;
 
+	## Whether to run PRAGMA integrity_check on the underlying database
+	## when creating a new store. For large databases on slow disks, this
+	## can block cluster startup for multiple seconds. Note also that every
+	## Zeek proecess owns its own database that it checks.
+	const default_run_integrity_check = F;
+
 	## Creates a new perstistent string store.
 	##
 	## name: A unqiue identifier for this table.
@@ -184,6 +190,10 @@ export {
 	##
 	## overwrite: Allows overriding default_overwrite.
 	##
+	## run_integrity_check: Whether to run PRAGMA integrity_check when openin
+	##                      the SQLite database. For large databases, this can
+	##                      result in significant startup delay.
+	##
 	## Returns: A new Store instance with an opened storage handle,
 	##          or a Store instance with an empty name and unset
 	##          storage_backend field.
@@ -196,7 +206,8 @@ export {
 	        cache_expire: interval &default=default_cache_expire,
 		batch_period: interval &default=default_batch_period,
 		batch_max_size: count &default=default_batch_max_size,
-		overwrite: bool &default=default_overwrite
+		overwrite: bool &default=default_overwrite,
+		run_integrity_check: bool &default=default_run_integrity_check
 	): Store;
 
 	## Insert a key-value pair into the store ``s``, overwriting any
@@ -261,7 +272,8 @@ function new_store(
 	cache_expire: interval &default=default_cache_expire,
 	batch_period: interval &default=default_batch_period,
 	batch_max_size: count &default=default_batch_max_size,
-	overwrite: bool &default=default_overwrite
+	overwrite: bool &default=default_overwrite,
+	run_integrity_check: bool &default=default_run_integrity_check
 ): Store
 	{
 	if ( name in stores )
@@ -317,11 +329,17 @@ function new_store(
 		return error_store;
 		}
 
-	local store_options = Storage::BackendOptions(
-		$sqlite=Storage::Backend::SQLite::Options(
-			$database_path=database_file,
-			$table_name="string_table",
-	));
+	local sqlite_opts = Storage::Backend::SQLite::Options(
+		$database_path=database_file,
+		$table_name="string_table",
+	);
+
+	if ( ! run_integrity_check )
+		delete sqlite_opts$pragma_commands["integrity_check"];
+	else if ( "integrity_check" !in sqlite_opts$pragma_commands )
+		sqlite_opts$pragma_commands["integrity_check"] = "";
+
+	local store_options = Storage::BackendOptions($sqlite=sqlite_opts);
 
 	local res = Storage::Sync::open_backend(Storage::STORAGE_BACKEND_SQLITE, store_options, string, string);
 
