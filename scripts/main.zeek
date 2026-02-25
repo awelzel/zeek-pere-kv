@@ -181,7 +181,7 @@ export {
 	##               avoids the call to the storage framework.
 	##
 	##               XXX: This is not functional and will always use
-	##		      default_cache_expire (3.0 sec by default).
+	##                    default_cache_expire (3.0 sec by default).
 	##                    See also PereKV::new_store().
 	##
 	## batch_period: Allows overriding default_batch_period..
@@ -203,7 +203,7 @@ export {
 	global new_store: function(
 		name: string,
 		create_expire: interval,
-	        cache_expire: interval &default=default_cache_expire,
+		cache_expire: interval &default=default_cache_expire,
 		batch_period: interval &default=default_batch_period,
 		batch_max_size: count &default=default_batch_max_size,
 		overwrite: bool &default=default_overwrite,
