@@ -291,7 +291,18 @@ function new_store(
 	# When running standalone, use "zeek" as node name. I thought
 	# that's the default, anyhow.
 	local node = |Cluster::node| == 0 ? "zeek" : Cluster::node;
-	local database_root_dir = Cluster::default_store_dir + "PereKV";
+
+	local database_root_dir = Cluster::default_store_dir;
+
+	# If Cluster::default_store_dir doesn't end with a /, append one so that
+	# PereKV is placed in a subdirectory of Cluster::default_store_dir.
+	if ( |database_root_dir| > 0 && /\/$/ !in database_root_dir ) {
+		print "append /", database_root_dir;
+		database_root_dir = database_root_dir + "/";
+	}
+
+	database_root_dir = database_root_dir + "PereKV";
+
 	local database_node_dir = database_root_dir + "/" + node;
 	local database_file = database_node_dir + "/" + name + ".sqlite";
 	local topic = base_topic + "." + name + ".";
@@ -316,6 +327,11 @@ function new_store(
 		$overwrite=overwrite,
 	);
 
+	if ( ! mkdir(Cluster::default_store_dir) )
+		{
+		Reporter::error(fmt("Failed to create directory: %s", Cluster::default_store_dir));
+		return error_store;
+		}
 
 	if ( ! mkdir(database_root_dir) )
 		{
